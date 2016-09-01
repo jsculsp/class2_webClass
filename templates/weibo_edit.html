@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑微博</title>
+</head>
+<body>
+    <form action="/weibo/update" method="post" class="pure-form pure-form-stacked">
+        <input type="hidden" name="id" value="{{weibo_id}}" >
+        <input type="text" name="content" value="{{weibo_content}}">
+        <br>
+        <button type="submit" class="pure-button pure-button-primary">编辑微博</button>
+    </form>
+</body>
+</html>

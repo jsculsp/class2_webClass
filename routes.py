@@ -57,14 +57,11 @@ def route_static(request):
 def route_login(request):
     headers = {
         'Content-Type': 'text/html',
-        # 'Set-Cookie': 'height=169',
     }
-    # log('login, headers', request.headers)
     log('login, cookies ({})'.format(request.cookies))
     username = current_user(request)
     if request.method == 'POST':
         form = request.form()
-        log('debug form ({})'.format(form))
         u = User(form)
         if u.validate_login():
             session_id = random_str()

@@ -3,8 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <title>所有微博</title>
+    <script src="http://cdn.bootcss.com/jquery/3.1.0/jquery.js"></script>
 </head>
 <body>
     {{weibos}}
+    <script>
+        $('.gua-show-comment').on('click', function() {
+            var weiboId = $(this).data('id');
+            // var weiboId = this.dataset.id;
+            var selector = '#id-div-comment-' + weiboId;
+            var div = $(selector)
+            div.toggleClass('gua-hide');
+            var opacity;
+            var height;
+            if (div.hasClass('gua-hide')) {
+                opacity = 0;
+                height = '0';
+            }
+            else {
+                opacity = 1;
+                height = '42px';
+            }
+            div.animate({
+                "height": height,
+                "opacity": opacity,
+            }, 1000);
+        })
+    </script>
+
 </body>
 </html>

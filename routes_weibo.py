@@ -1,5 +1,6 @@
 from models import User
 from models import Weibo
+from models import Comment
 
 from response import session
 from response import template
@@ -30,15 +31,39 @@ def route_weibo_index(request):
     else:
         # 找到 user 发布的所有微博
         weibos = Weibo.find_all(user_id=user.id)
-
+        current_username = current_user(request)
+        u = User.find_by(username=current_username)
+        if u is None:
+            return redirect('/login')
         def weibo_tag(weibo):
-            return '<p>{} from {}@{} <a href="/weibo/delete?id={}">删除</a> <a href="/weibo/edit?id={}">编辑</a></p>'.format(
-                weibo.content,
-                user.username,
-                weibo.created_time,
-                weibo.id,
-                weibo.id,
-            )
+            comment_list = Comment.find_all(weibo_id=weibo.id)
+            comments = '<br>'.join([c.content for c in comment_list])
+            w = {
+                'id': weibo.id,
+                'content': weibo.content,
+                'username': user.username,
+                'time': weibo.created_time,
+                'user_id': u.id,
+                'comments': comments,
+            }
+            return '''
+            <p>{content} from {username}@{time}
+                <a href="/weibo/delete?id={id}">删除</a>
+                <a href="/weibo/edit?id={id}">编辑</a>
+                <button class="gua-show-comment" data-id="{id}">评论</button>
+                <div id="id-div-comment-{id}" class="gua-comment-form gua-hide">
+                    <form action="/weibo/comment/add" method='post'>
+                        <input name="user_id" value="{user_id}" type="hidden">
+                        <input name="weibo_id" value="{id}" type="hidden">
+                        <textarea name="content"></textarea>
+                        <button type="submit">添加评论</button>
+                    </form>
+                </div>
+                <div>
+                    {comments}
+                </div>
+            </p>
+            '''.format(**w)
 
         weibos = '\n    <br>\n    '.join([weibo_tag(w) for w in weibos])
         body = template('weibo_index.html', weibos=weibos)
@@ -115,6 +140,16 @@ def route_weibo_update(request):
     return redirect('/weibo?user_id={}'.format(user.id))
 
 
+def route_comment_add(request):
+    form = request.form()
+    c = Comment(form)
+    c.save()
+    w = Weibo.find(c.weibo_id)
+    # 重定向到用户的主页
+    return redirect('/weibo?user_id={}'.format(w.user_id))
+
+
+
 # 定义一个函数统一检测是否登录
 def login_required(route_function):
     def func(request):
@@ -133,6 +168,6 @@ route_dict = {
     '/weibo/add': login_required(route_weibo_add),
     '/weibo/delete': login_required(route_weibo_delete),
     '/weibo/edit': login_required(route_weibo_edit),
-    '/weibo/update': login_required(route_weibo_update)
-
+    '/weibo/update': login_required(route_weibo_update),
+    '/weibo/comment/add': login_required(route_comment_add),
 }

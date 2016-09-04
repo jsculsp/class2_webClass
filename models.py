@@ -160,3 +160,12 @@ class Todo(Model):
 
     def status(self):
         return '完成' if self.complete else '待办'
+
+
+class Comment(Model):
+    def __init__(self, form):
+        self.id = form.get('id', None)
+        self.content = form.get('content', '')
+        self.created_time = time.ctime(int(time.time()))
+        self.user_id = int(form.get('user_id', -1))
+        self.weibo_id = int(form.get('weibo_id', -1))
